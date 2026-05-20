@@ -28,12 +28,12 @@ scripts/setup-host.sh
 scripts/deploy.sh
 ```
 
-Default client access is LAN/WireGuard-ready. The NATS client port is published
-on all host interfaces by default, while the monitoring port stays local-only:
+Default client and monitoring access are LAN/WireGuard-ready. Both ports are
+published on all host interfaces by default:
 
 ```text
 0.0.0.0:4222 = NATS client port
-127.0.0.1:8222 = NATS monitor port
+0.0.0.0:8222 = NATS monitor HTTP port
 ```
 
 On a host such as `phy-nangman-dev-lattepanda-seokchon-01`, LAN clients can use:
@@ -42,15 +42,27 @@ On a host such as `phy-nangman-dev-lattepanda-seokchon-01`, LAN clients can use:
 nats://192.168.10.45:4222
 ```
 
-If the host has multiple networks and the service should be reachable only on a
-specific LAN address, set this in `.env` before running `scripts/deploy.sh`:
+The monitoring endpoints are available in a browser at:
+
+```text
+http://192.168.10.45:8222/
+http://192.168.10.45:8222/varz
+http://192.168.10.45:8222/connz
+http://192.168.10.45:8222/jsz
+http://192.168.10.45:8222/healthz
+```
+
+If the host has multiple networks and the service should be reachable only on
+one specific LAN address, set these in `.env` before running
+`scripts/deploy.sh`:
 
 ```text
 NATS_CLIENT_BIND=192.168.10.45
+NATS_MONITOR_BIND=192.168.10.45
 ```
 
-Do not bind the monitor port to a LAN address unless there is a separate access
-control layer in front of it.
+Do not expose the monitoring port to the public internet. NATS monitoring
+endpoints do not provide their own authentication or authorization.
 
 Default durable data path:
 
@@ -89,6 +101,9 @@ docker run --rm natsio/nats-box:0.17.0 \
 
 docker run --rm natsio/nats-box:0.17.0 \
   nats --server nats://192.168.10.45:4222 stream info RAW_INTEL
+
+curl http://192.168.10.45:8222/healthz
+curl http://192.168.10.45:8222/jsz
 ```
 
 Re-apply stream definitions without restarting the server:
