@@ -8,7 +8,7 @@ services:
       - -c
       - /etc/nats/nats-server.conf
     ports:
-      - ${NATS_CLIENT_BIND:-127.0.0.1}:${NATS_CLIENT_PORT:-4222}:4222
+      - ${NATS_CLIENT_BIND:-0.0.0.0}:${NATS_CLIENT_PORT:-4222}:4222
       - ${NATS_MONITOR_BIND:-127.0.0.1}:${NATS_MONITOR_PORT:-8222}:8222
     volumes:
       - ${NATS_CONFIG_PATH:-/opt/nangman-crypto/apps/nats-server-app/nats-server.conf}:/etc/nats/nats-server.conf:ro
