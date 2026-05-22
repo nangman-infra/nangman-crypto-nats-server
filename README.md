@@ -39,17 +39,17 @@ published on all host interfaces by default:
 On a host such as `phy-nangman-dev-lattepanda-seokchon-01`, LAN clients can use:
 
 ```text
-nats://192.168.10.45:4222
+nats://<private-nats-host>:4222
 ```
 
 The monitoring endpoints are available in a browser at:
 
 ```text
-http://192.168.10.45:8222/
-http://192.168.10.45:8222/varz
-http://192.168.10.45:8222/connz
-http://192.168.10.45:8222/jsz
-http://192.168.10.45:8222/healthz
+http://<private-nats-host>:8222/
+http://<private-nats-host>:8222/varz
+http://<private-nats-host>:8222/connz
+http://<private-nats-host>:8222/jsz
+http://<private-nats-host>:8222/healthz
 ```
 
 If the host has multiple networks and the service should be reachable only on
@@ -57,8 +57,8 @@ one specific LAN address, set these in `.env` before running
 `scripts/deploy.sh`:
 
 ```text
-NATS_CLIENT_BIND=192.168.10.45
-NATS_MONITOR_BIND=192.168.10.45
+NATS_CLIENT_BIND=<private-nats-host>
+NATS_MONITOR_BIND=<private-nats-host>
 ```
 
 Do not expose the monitoring port to the public internet. NATS monitoring
@@ -97,13 +97,13 @@ Verify LAN reachability from another host:
 
 ```bash
 docker run --rm natsio/nats-box:0.17.0 \
-  nats --server nats://192.168.10.45:4222 server check connection
+  nats --server nats://<private-nats-host>:4222 server check connection
 
 docker run --rm natsio/nats-box:0.17.0 \
-  nats --server nats://192.168.10.45:4222 stream info RAW_INTEL
+  nats --server nats://<private-nats-host>:4222 stream info RAW_INTEL
 
-curl http://192.168.10.45:8222/healthz
-curl http://192.168.10.45:8222/jsz
+curl http://<private-nats-host>:8222/healthz
+curl http://<private-nats-host>:8222/jsz
 ```
 
 Re-apply stream definitions without restarting the server:
