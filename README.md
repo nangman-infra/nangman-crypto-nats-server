@@ -112,3 +112,10 @@ Re-apply stream definitions without restarting the server:
 cd /Volumes/WD/Developments/nangman-crypto/apps/nats-server-app
 scripts/ensure-streams.sh
 ```
+
+Validate the standalone repository before pushing:
+
+```bash
+cd /Volumes/WD/Developments/nangman-crypto/apps/nats-server-app
+scripts/validate.sh
+```
