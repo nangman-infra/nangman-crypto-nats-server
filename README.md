@@ -20,12 +20,15 @@ nats-server
   -> intel-structuring-app publishes L1 pointers to STRUCTURED_INTEL
 ```
 
-Start it before app workers:
+Provision it before app workers and verify the streams from the active runtime
+context. This repository documents the NATS stream boundary; deployment
+parameters come from private infrastructure context, not from public examples.
 
 ```bash
-cd /Volumes/WD/Developments/nangman-crypto/apps/nats-server-app
-scripts/setup-host.sh
-scripts/deploy.sh
+AWS_PROFILE=<local-aws-profile> AWS_REGION=ap-northeast-2 \
+aws ecs describe-services \
+  --cluster <ecs-cluster-name> \
+  --services <nats-service-name>
 ```
 
 Default client and monitoring access are LAN/WireGuard-ready. Both ports are
@@ -52,9 +55,8 @@ http://<private-nats-host>:8222/jsz
 http://<private-nats-host>:8222/healthz
 ```
 
-If the host has multiple networks and the service should be reachable only on
-one specific LAN address, set these in `.env` before running
-`scripts/deploy.sh`:
+If a private runtime binds NATS to a specific LAN address, keep the bind values
+in private infrastructure configuration:
 
 ```text
 NATS_CLIENT_BIND=<private-nats-host>
