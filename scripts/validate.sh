@@ -3,11 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 APP_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
-COMPOSE="$APP_DIR/compose.yml"
-ENV_EXAMPLE="$APP_DIR/.env.example"
 CONFIG="$APP_DIR/nats-server.conf"
-
-docker compose -f "$COMPOSE" --env-file "$ENV_EXAMPLE" config >/dev/null
 
 for script in "$APP_DIR"/scripts/*.sh; do
   bash -n "$script"

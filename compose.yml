@@ -1,59 +1,9 @@
-name: nangman-crypto-nats
+# Legacy local compose file.
+#
+# Do not use this file for deployment or runtime verification. The current NATS
+# runtime must be validated from the active runtime endpoint and stream state,
+# not from this compose profile.
 
-services:
-  nats:
-    image: nats:2.11-alpine
-    restart: unless-stopped
-    command:
-      - -c
-      - /etc/nats/nats-server.conf
-    ports:
-      - ${NATS_CLIENT_BIND:-0.0.0.0}:${NATS_CLIENT_PORT:-4222}:4222
-      - ${NATS_MONITOR_BIND:-0.0.0.0}:${NATS_MONITOR_PORT:-8222}:8222
-    volumes:
-      - ${NATS_CONFIG_PATH:-/opt/nangman-crypto/apps/nats-server-app/nats-server.conf}:/etc/nats/nats-server.conf:ro
-      - ${NATS_DATA_ROOT:-/opt/nangman-crypto/data/nats}:/data
-    networks:
-      - nangman-crypto-bus
+name: nangman-crypto-nats-legacy-compose-disabled
 
-  nats-init:
-    image: natsio/nats-box:0.17.0
-    restart: "no"
-    depends_on:
-      - nats
-    environment:
-      NATS_URL: nats://nats:4222
-      NATS_RAW_INTEL_STREAM_MAX_AGE: ${NATS_RAW_INTEL_STREAM_MAX_AGE:-168h}
-      NATS_STRUCTURED_INTEL_STREAM_MAX_AGE: ${NATS_STRUCTURED_INTEL_STREAM_MAX_AGE:-336h}
-      NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW: ${NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW:-24h}
-      NATS_INTEL_CANDIDATE_STREAM_MAX_AGE: ${NATS_INTEL_CANDIDATE_STREAM_MAX_AGE:-336h}
-      NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW: ${NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW:-24h}
-    command: >
-      sh -lc '
-        until nats --server "$$NATS_URL" server check connection >/dev/null 2>&1; do
-          sleep 1;
-        done;
-        if nats --server "$$NATS_URL" stream info RAW_INTEL >/dev/null 2>&1; then
-          nats --server "$$NATS_URL" stream info RAW_INTEL;
-        else
-          nats --server "$$NATS_URL" stream add RAW_INTEL --subjects "raw_intel_event.>" --storage file --retention limits --discard old --max-age "$$NATS_RAW_INTEL_STREAM_MAX_AGE" --dupe-window 2m --defaults;
-        fi;
-        if nats --server "$$NATS_URL" stream info STRUCTURED_INTEL >/dev/null 2>&1; then
-          nats --server "$$NATS_URL" stream update STRUCTURED_INTEL --subjects "structured_intel_packet.created" --subjects "context_flag_packet.created" --subjects "structuring_health_event.created" --discard old --max-age "$$NATS_STRUCTURED_INTEL_STREAM_MAX_AGE" --dupe-window "$$NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW" --force;
-        else
-          nats --server "$$NATS_URL" stream add STRUCTURED_INTEL --subjects "structured_intel_packet.created" --subjects "context_flag_packet.created" --subjects "structuring_health_event.created" --storage file --retention limits --discard old --max-age "$$NATS_STRUCTURED_INTEL_STREAM_MAX_AGE" --dupe-window "$$NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW" --defaults;
-        fi;
-        nats --server "$$NATS_URL" stream info STRUCTURED_INTEL;
-        if nats --server "$$NATS_URL" stream info INTEL_CANDIDATE >/dev/null 2>&1; then
-          nats --server "$$NATS_URL" stream update INTEL_CANDIDATE --subjects "intel_candidate_evidence_bundle.created" --subjects "intel_candidate_screening_event.created" --subjects "intel_candidate_hypothesis_state.created" --subjects "intel_candidate_health_event.created" --discard old --max-age "$$NATS_INTEL_CANDIDATE_STREAM_MAX_AGE" --dupe-window "$$NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW" --force;
-        else
-          nats --server "$$NATS_URL" stream add INTEL_CANDIDATE --subjects "intel_candidate_evidence_bundle.created" --subjects "intel_candidate_screening_event.created" --subjects "intel_candidate_hypothesis_state.created" --subjects "intel_candidate_health_event.created" --storage file --retention limits --discard old --max-age "$$NATS_INTEL_CANDIDATE_STREAM_MAX_AGE" --dupe-window "$$NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW" --defaults;
-        fi;
-        nats --server "$$NATS_URL" stream info INTEL_CANDIDATE
-      '
-    networks:
-      - nangman-crypto-bus
-
-networks:
-  nangman-crypto-bus:
-    name: ${NANGMAN_NATS_DOCKER_NETWORK:-nangman-crypto-bus}
+services: {}
