@@ -7,6 +7,8 @@ NATS_STRUCTURED_INTEL_STREAM_MAX_AGE="${NATS_STRUCTURED_INTEL_STREAM_MAX_AGE:-33
 NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW="${NATS_STRUCTURED_INTEL_STREAM_DUPLICATE_WINDOW:-24h}"
 NATS_INTEL_CANDIDATE_STREAM_MAX_AGE="${NATS_INTEL_CANDIDATE_STREAM_MAX_AGE:-336h}"
 NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW="${NATS_INTEL_CANDIDATE_STREAM_DUPLICATE_WINDOW:-24h}"
+NATS_MARKET_LIVE_STREAM_MAX_AGE="${NATS_MARKET_LIVE_STREAM_MAX_AGE:-24h}"
+NATS_MARKET_LIVE_STREAM_DUPLICATE_WINDOW="${NATS_MARKET_LIVE_STREAM_DUPLICATE_WINDOW:-2m}"
 
 if ! command -v nats >/dev/null 2>&1; then
   printf 'missing required command: nats\n' >&2
@@ -77,3 +79,22 @@ else
     --defaults
 fi
 nats --server "$NATS_URL" stream info INTEL_CANDIDATE
+
+if nats --server "$NATS_URL" stream info MARKET_LIVE >/dev/null 2>&1; then
+  nats --server "$NATS_URL" stream update MARKET_LIVE \
+    --subjects "market_live_tick.created.>" \
+    --discard old \
+    --max-age "$NATS_MARKET_LIVE_STREAM_MAX_AGE" \
+    --dupe-window "$NATS_MARKET_LIVE_STREAM_DUPLICATE_WINDOW" \
+    --force
+else
+  nats --server "$NATS_URL" stream add MARKET_LIVE \
+    --subjects "market_live_tick.created.>" \
+    --storage file \
+    --retention limits \
+    --discard old \
+    --max-age "$NATS_MARKET_LIVE_STREAM_MAX_AGE" \
+    --dupe-window "$NATS_MARKET_LIVE_STREAM_DUPLICATE_WINDOW" \
+    --defaults
+fi
+nats --server "$NATS_URL" stream info MARKET_LIVE

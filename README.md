@@ -15,9 +15,11 @@ nats-server
   -> INTEL_CANDIDATE stream for intel_candidate_screening_event.created
   -> INTEL_CANDIDATE stream for intel_candidate_hypothesis_state.created
   -> INTEL_CANDIDATE stream for intel_candidate_health_event.created
+  -> MARKET_LIVE stream for market_live_tick.created.>
   -> Docker network: nangman-crypto-bus
   -> intel-crawl-app connects with NATS_URL=nats://nats:4222
   -> intel-structuring-app publishes L1 pointers to STRUCTURED_INTEL
+  -> market-ingest-app publishes low-latency paper-watch ticks to MARKET_LIVE when configured
 ```
 
 Provision it before app workers and verify the streams from the active runtime
@@ -80,6 +82,8 @@ STRUCTURED_INTEL = 336h
 STRUCTURED_INTEL duplicate window = 24h
 INTEL_CANDIDATE = 336h
 INTEL_CANDIDATE duplicate window = 24h
+MARKET_LIVE = 24h
+MARKET_LIVE duplicate window = 2m
 ```
 
 Verify streams:
@@ -93,6 +97,9 @@ sudo docker run --rm --network host natsio/nats-box:0.17.0 \
 
 sudo docker run --rm --network host natsio/nats-box:0.17.0 \
   nats --server nats://127.0.0.1:4222 stream info INTEL_CANDIDATE
+
+sudo docker run --rm --network host natsio/nats-box:0.17.0 \
+  nats --server nats://127.0.0.1:4222 stream info MARKET_LIVE
 ```
 
 Verify LAN reachability from another host:
